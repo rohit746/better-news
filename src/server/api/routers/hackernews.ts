@@ -26,6 +26,7 @@ const getTopStoriesIds = unstable_cache(
   async () => {
     const res = await fetch(
       "https://hacker-news.firebaseio.com/v0/topstories.json",
+      { next: { revalidate: 60 } },
     );
     return (await res.json()) as number[];
   },
@@ -34,14 +35,15 @@ const getTopStoriesIds = unstable_cache(
 );
 
 const getStoryItem = unstable_cache(
-  async (id: number) => {
+  async (id: number): Promise<unknown> => {
     const res = await fetch(
       `https://hacker-news.firebaseio.com/v0/item/${id}.json`,
+      { next: { revalidate: 3600 } },
     );
     return await res.json();
   },
   ["hn-item"],
-  { revalidate: 300 },
+  { revalidate: 3600 },
 );
 
 export const hackerNewsRouter = createTRPCRouter({
@@ -54,7 +56,7 @@ export const hackerNewsRouter = createTRPCRouter({
     )
     .query(async ({ input }) => {
       const { limit, cursor } = input;
-      const skip = cursor || 0;
+      const skip = cursor ?? 0;
 
       const topStoriesIds = await getTopStoriesIds();
 
@@ -64,15 +66,16 @@ export const hackerNewsRouter = createTRPCRouter({
         slicedIds.map((id) => getStoryItem(id)),
       );
 
-      const stories = storiesRaw.filter(
-        (s): s is HNItem =>
-          s !== null &&
-          typeof s === "object" &&
-          "id" in s &&
-          s.type === "story" &&
-          !s.dead &&
-          !s.deleted,
-      );
+      const stories = storiesRaw
+        .map((s) => HNItemSchema.safeParse(s))
+        .filter(
+          (result): result is { success: true; data: HNItem } =>
+            result.success &&
+            result.data.type === "story" &&
+            !result.data.dead &&
+            !result.data.deleted,
+        )
+        .map((result) => result.data);
 
       return {
         stories,

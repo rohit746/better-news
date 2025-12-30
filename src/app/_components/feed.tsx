@@ -1,12 +1,12 @@
 "use client";
 
+import React, { memo } from "react";
 import { api } from "~/trpc/react";
 import type { HNItem } from "~/server/api/routers/hackernews";
-import { ExternalLink, MessageSquare, Clock, ArrowUpRight } from "lucide-react";
+import { MessageSquare, ArrowUpRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Badge } from "~/components/ui/badge";
+import { Card, CardHeader, CardTitle } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Button } from "~/components/ui/button";
 
@@ -26,7 +26,13 @@ const getDomain = (url: string | undefined) => {
   }
 };
 
-function StoryCard({ story, index }: { story: HNItem; index: number }) {
+const StoryCard = memo(function StoryCard({
+  story,
+  index,
+}: {
+  story: HNItem;
+  index: number;
+}) {
   if (!story.title) return null;
 
   return (
@@ -89,7 +95,7 @@ function StoryCard({ story, index }: { story: HNItem; index: number }) {
       </CardHeader>
     </Card>
   );
-}
+});
 
 function FeedSkeleton() {
   return (

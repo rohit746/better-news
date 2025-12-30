@@ -1,8 +1,10 @@
 import { NewsFeed } from "~/app/_components/feed";
 import { api, HydrateClient } from "~/trpc/server";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
-  void api.hackernews.getTopStories.prefetchInfinite({ limit: 20 });
+  await api.hackernews.getTopStories.prefetchInfinite({ limit: 20 });
 
   return (
     <HydrateClient>
