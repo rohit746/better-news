@@ -9,7 +9,7 @@ import { ThemeToggle } from "~/components/theme-toggle";
 export const metadata: Metadata = {
   title: "Better News",
   description: "A beautiful Hacker News client",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [{ rel: "icon", url: "/favicon.svg" }],
 };
 
 const geist = Geist({
